@@ -1,0 +1,13 @@
+{
+  "name": "icofr-control-poc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prototipe alur Control Self-Assessment ICOFR — dokumen requirement yang bisa diklik.",
+  "scripts": {
+    "test": "node tests/smoke.test.js",
+    "start": "npx --yes serve . -l 3000"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

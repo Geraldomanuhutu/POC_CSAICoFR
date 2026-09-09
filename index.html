@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICOFR/Control — CSA Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0b2f7a;
+  --navy-deep:#07235c;
+  --blue-head:#0f4fd8;
+  --orange:#e8620d;
+  --orange-soft:#fdf3ea;
+  --ink:#12181f;
+  --muted:#6a7482;
+  --line:#dfe4ea;
+  --surface:#ffffff;
+  --page:#f6f8fb;
+  --green:#1e8e4a;
+  --green-bg:#e3f6ea;
+  --red:#c0392b;
+  --red-bg:#fdeaea;
+  --amber-bg:#fdf1dd;
+  --amber-ink:#96570b;
+  --radius:4px;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e9edf3; --muted:#9aa5b4; --line:#2a3340; --surface:#151b23; --page:#0e1319;
+    --orange-soft:#2a1c10; --green-bg:#12291c; --red-bg:#2c1616; --amber-bg:#2b2010; --amber-ink:#e8b970;
+    --blue-head:#6ea0ff; --navy:#12356f;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e9edf3; --muted:#9aa5b4; --line:#2a3340; --surface:#151b23; --page:#0e1319;
+  --orange-soft:#2a1c10; --green-bg:#12291c; --red-bg:#2c1616; --amber-bg:#2b2010; --amber-ink:#e8b970;
+  --blue-head:#6ea0ff; --navy:#12356f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--page); color:var(--ink);
+  font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:13px; line-height:1.5;
+}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--orange); outline-offset:2px}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+
+/* ---------- chrome ---------- */
+.topbar{background:var(--surface); border-bottom:3px solid var(--orange); position:sticky; top:0; z-index:40}
+.topbar-in{max-width:1400px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:9px; font-weight:800; font-size:16px; letter-spacing:-.02em}
+.shield{width:26px;height:26px;border-radius:5px;background:var(--navy);display:grid;place-items:center;color:#fff;font-size:13px}
+.brand small{font-weight:500;color:var(--muted); font-size:10px; letter-spacing:.05em}
+.navpill{background:#0d1520;color:#fff;border:0;padding:8px 16px;border-radius:var(--radius);font-weight:600;font-size:12.5px;cursor:pointer}
+.spacer{flex:1}
+.who{text-align:right;line-height:1.35}
+.who b{font-size:12.5px}
+.who span{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.signout{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:12.5px}
+
+.wrap{max-width:1400px;margin:0 auto;padding:18px 20px 60px}
+.crumb{color:var(--muted);font-size:11.5px;margin-bottom:10px}
+.crumb b{color:var(--ink);font-weight:600}
+.pagehead{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:27px;margin:0;color:var(--blue-head);letter-spacing:-.02em;font-weight:800}
+.sub{color:var(--muted);font-size:12px;margin-top:4px}
+.sub b{color:var(--ink)}
+.actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- buttons ---------- */
+.btn{border-radius:var(--radius);padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid transparent;background:var(--surface);color:var(--ink);white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{border-color:var(--line)}
+.btn-o{border-color:var(--orange);color:var(--orange);background:transparent}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-danger{border-color:var(--red);color:var(--red);background:transparent}
+.btn-sm{padding:6px 11px;font-size:11.5px}
+
+/* ---------- cards / tables ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+.card-pad{padding:18px}
+.card h2{font-size:16px;margin:0 0 14px;color:var(--blue-head);font-weight:800}
+.sec-label{font-size:10.5px;letter-spacing:.08em;color:var(--muted);font-weight:700;margin:20px 0 8px;display:flex;align-items:center;gap:10px}
+.sec-label:after{content:"";flex:1;height:1px;background:var(--line)}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+thead th{background:var(--orange);color:#fff;text-align:left;padding:10px 12px;font-weight:700;font-size:11px;letter-spacing:.02em;vertical-align:bottom}
+thead.navy th{background:var(--navy)}
+tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:rgba(127,140,160,.045)}
+.nowrap{white-space:nowrap}
+
+/* ---------- form ---------- */
+label.f{display:block;font-size:10.5px;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:5px}
+input[type=text],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);font-size:13px;font-family:inherit}
+textarea{resize:vertical;min-height:76px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+
+/* ---------- misc ---------- */
+.badge{display:inline-block;padding:3px 9px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:.03em}
+.b-pass{background:var(--green-bg);color:var(--green)}
+.b-fail{background:var(--red-bg);color:var(--red)}
+.b-info{background:var(--amber-bg);color:var(--amber-ink)}
+.b-grey{background:rgba(127,140,160,.16);color:var(--muted)}
+.b-navy{background:rgba(11,47,122,.12);color:var(--blue-head)}
+.insight{background:var(--navy);color:#fff;padding:16px 18px;border-radius:var(--radius);margin-bottom:16px}
+.insight h3{margin:0 0 7px;font-size:14px}
+.insight p{margin:0;font-size:12px;line-height:1.65;opacity:.94}
+.steps{display:flex;gap:26px;justify-content:center;margin:6px 0 22px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.step i{width:21px;height:21px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;background:rgba(127,140,160,.2);color:var(--muted)}
+.step.on{color:var(--orange)} .step.on i{background:var(--orange);color:#fff}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab{padding:10px 2px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:0;border-left:0;border-right:0}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange)}
+.samplebar{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;background:var(--surface)}
+.metarow{display:flex;gap:26px;flex-wrap:wrap;margin-top:10px}
+.meta{min-width:120px}
+.meta span{display:block;font-size:9.5px;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.meta b{font-weight:500;font-size:12.5px}
+.note{background:var(--amber-bg);color:var(--amber-ink);border-radius:var(--radius);padding:10px 13px;font-size:11.5px;margin-top:12px}
+.hint{background:var(--orange-soft);border-left:3px solid var(--orange);padding:9px 12px;font-size:11px;color:var(--muted);line-height:1.6}
+.link{color:var(--orange);font-weight:600;cursor:pointer;text-decoration:none;background:none;border:0;padding:0;font-size:inherit}
+.center-empty{text-align:center;color:var(--muted);padding:26px;font-size:12.5px}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(8,14,22,.55);display:grid;place-items:center;padding:20px;z-index:60}
+.modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:560px;max-height:88vh;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.modal.lg{max-width:960px}
+.modal-h{padding:18px 20px 0;display:flex;align-items:flex-start;gap:12px}
+.modal-h h3{margin:0;font-size:16px;color:var(--blue-head);font-weight:800}
+.modal-b{padding:14px 20px}
+.modal-f{padding:14px 20px 18px;display:flex;justify-content:flex-end;gap:8px}
+.x{margin-left:auto;background:none;border:0;font-size:18px;color:var(--muted);cursor:pointer;line-height:1}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;max-width:520px;width:100%;padding:30px}
+.role{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--radius);padding:14px;cursor:pointer;margin-bottom:10px}
+.role:hover{border-color:var(--orange)}
+.role b{display:block;font-size:13.5px}
+.role span{font-size:11.5px;color:var(--muted)}
+.role i{width:30px;height:30px;border-radius:4px;background:var(--navy);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:12px;flex:none}
+
+/* toast */
+.toast{position:fixed;top:14px;right:14px;background:#14532d;color:#fff;padding:12px 16px;border-radius:var(--radius);font-size:12.5px;z-index:80;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.docprev{border:1px solid var(--line);border-radius:var(--radius);padding:16px;font-size:10.5px;line-height:1.7;background:var(--surface)}
+.docprev h4{margin:0 0 8px;font-size:11px;text-align:center;letter-spacing:.06em}
+.docprev .r{display:flex;gap:8px}
+.docprev .r span:first-child{width:150px;color:var(--muted)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.evbox{border:1px solid var(--navy);border-radius:var(--radius);padding:14px}
+.evgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.evcell{background:rgba(127,140,160,.08);padding:10px;border-radius:3px}
+.evcell span{display:block;font-size:9.5px;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:5px}
+@media (max-width:820px){.grid2,.split,.evgrid{grid-template-columns:1fr}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   ICOFR/Control — CSA prototype (in-house POC)
+   ============================================================ */
+
+const PROCEDURES = [
+ {step:1, text:"Meninjau keselarasan dokumen prakarsa kredit (e.g. memiliki nama yang sama) dan akurasi informasi pengajuan permohonan kredit dari Account Officer pada Sistem."},
+ {step:2, text:"Meninjau permohonan kredit dengan mempertimbangkan hal-hal sebagai berikut pada Form Rekomendasi Pinjaman:\na. Hasil penilaian kredit kuantitatif (Credit Scoring Risk / CRS) pada Sistem\nb. Rekomendasi pinjaman yang diajukan oleh Account Officer (suku bunga, tipe dan struktur kredit)"},
+ {step:3, text:"Meninjau seluruh dokumen pendukung permohonan kredit yang diunggah terhadap kesesuaian dan konsistensi data tanpa adanya ketidakselarasan informasi dengan sampel."},
+ {step:4, text:"Suku bunga per tahun harus di dalam rentang 5 sampai 10 persen pada Form Rekomendasi Pinjaman."},
+ {step:5, text:"Memastikan jumlah permohonan pada Form Permohonan Pinjaman lebih rendah atau sama dengan plafond pinjaman pada Form Rekomendasi Pinjaman."},
+ {step:6, text:"Memastikan jangka waktu pinjaman sesuai antara sampel dengan Form Rekomendasi Pinjaman sebagai dokumen persetujuan permohonan pinjaman."}
+];
+
+const DOC_REQS = [
+ {no:1, name:"Form Permohonan Pinjam", prompt:""},
+ {no:2, name:"Identitas pemohon (KTP)", prompt:"- Pastikan nilai NIK pada KTP hanya terdiri dari 16 digit angka.\n- Pastikan nama pada KTP tidak kosong dan sesuai dengan nama pemohon pada Form Permohonan Pinjaman.\n- Pastikan tempat/tanggal lahir pada KTP memuat tempat lahir dan tanggal kalender yang valid.\n- Pastikan alamat pada KTP tidak kosong.\n- Pastikan pekerjaan pada KTP tidak kosong.\n- Pastikan masa berlaku KTP mencantumkan tanggal yang masih berlaku atau tertulis \"SEUMUR HIDUP\"."},
+ {no:3, name:"Form Rekomendasi Pinjaman oleh Account Officer", prompt:""}
+];
+
+const AI_RESULTS = [
+ {step:1, result:"FAIL", conf:98, insight:"Nama pemohon pada dokumen prakarsa kredit tidak sesuai dengan nama pada sampel transaksi, karena Nama Ymp pada Form Pinjaman.jpg tercatat sebagai SANAN, sedangkan nama pemohon seharusnya GUOHUI CHEN.", source:"Form Pinjaman.jpg", sampleVal:"GUOHUI CHEN", evVal:"SANAN", evLabel:"NAMA PEMOHON", verdictEv:"MISMATCH"},
+ {step:2, result:"FAIL", conf:91, insight:"Tidak ditemukan bukti hasil penilaian kredit kuantitatif (Credit Scoring Risk / CRS) dari sistem pada Form Rekomendasi Pinjaman (Credit Scoring).png, meskipun informasi rekomendasi pinjaman lainnya seperti suku bunga, tipe, dan jangka waktu telah tercantum.", source:"Form Rekomendasi Pinjaman (Credit Scoring).png", sampleVal:"Wajib ada skor CRS sistem", evVal:"Tidak ditemukan", evLabel:"CREDIT SCORING", verdictEv:"NOT FOUND"},
+ {step:3, result:"FAIL", conf:100, insight:"Masa berlaku KTP pada dokumen KTP.pdf telah habis karena tanggal Berlaku Hingga tercatat 12-12-2023, sehingga tidak memenuhi persyaratan masih aktif atau 'SEUMUR HIDUP'.", source:"KTP.pdf", sampleVal:"Aktif / SEUMUR HIDUP", evVal:"12-12-2023", evLabel:"BERLAKU HINGGA", verdictEv:"EXPIRED"},
+ {step:4, result:"PASS", conf:99, insight:"Suku bunga per tahun sebesar 6.0 % pada Form Rekomendasi Pinjaman (Credit Scoring).png berada dalam rentang yang ditentukan, yaitu antara 5 hingga 10 persen, sehingga memenuhi persyaratan.", source:"Form Rekomendasi Pinjaman (Credit Scoring).png", sampleVal:"5% – 10%", evVal:"6,00 %", evLabel:"SUKU BUNGA", verdictEv:"MATCH"},
+ {step:5, result:"FAIL", conf:74, insight:"Jumlah Permohonan pada Form Pinjaman.jpg tercatat Rp 50.000.000, namun tidak sesuai dengan ketentuan bahwa jumlah permohonan harus lebih rendah atau sama dengan Plafond Pinjaman pada Form Rekomendasi Pinjaman (Credit Scoring).png, yang juga tercatat Rp 50.000.000, menunjukkan potensi ketidaksesuaian interpretasi atau kesalahan dokumentasi.", source:"Form Pinjaman.jpg", sampleVal:"Rp 50.000.000", evVal:"Rp 50.000.000", evLabel:"JUMLAH PERMOHONAN", verdictEv:"MISMATCH"},
+ {step:6, result:"FAIL", conf:100, insight:"Jangka Waktu pada sampel tercatat 2 tahun, sedangkan pada Form Rekomendasi Pinjaman (Credit Scoring).png tercantum 24 bulan; meskipun secara nilai setara, ketidaksesuaian format menciptakan ketidakselarasan yang mengakibatkan kegagalan verifikasi.", source:"Form Rekomendasi Pinjaman (Credit Scoring).png", sampleVal:"2 tahun", evVal:"24 bulan", evLabel:"JANGKA WAKTU", verdictEv:"MISMATCH"}
+];
+
+const SUMMARY = "Temuan menunjukkan ketidaksesuaian kritis pada beberapa aspek dokumen kredit, termasuk ketidakcocokan data Nama Ymp pada Form Pinjaman.jpg, ketidaksesuaian Berlaku Hingga pada KTP.pdf, ketidaksesuaian antara Jumlah Permohonan pada Form Pinjaman.jpg dengan Plafond Pinjaman pada Form Rekomendasi Pinjaman (Credit Scoring).png, serta ketidaksesuaian Jangka Waktu pada Form Rekomendasi Pinjaman (Credit Scoring).png. Selain itu, tidak terdapat bukti hasil penilaian kredit kuantitatif (Credit Scoring Risk / CRS) dari sistem pada Form Rekomendasi Pinjaman (Credit Scoring).png, yang merupakan kegagalan kritis dalam memenuhi persyaratan validasi kredit.";
+
+const ORG_UNITS = [
+ {name:"Cabang Balikpapan Hub (BALIKPAPAN)", id:"BPN-001", area:"Kalimantan"},
+ {name:"Cabang Bandung Raya (BANDUNG)", id:"BDG-001", area:"Jawa Barat"},
+ {name:"Cabang Denpasar Bali (DENPASAR)", id:"DPS-001", area:"Bali Nusra"},
+ {name:"Cabang Jakarta Kemayoran (JAKARTA)", id:"JKT-001", area:"Jakarta"},
+ {name:"Cabang Makassar Utama (MAKASSAR)", id:"MKS-001", area:"Sulawesi"},
+ {name:"Cabang Medan Kota (MEDAN)", id:"MDN-001", area:"Sumatera"}
+];
+
+const SAMPLE_ROW = {
+  sample:"Sample1", regional:"Jakarta", branch:"Cabang Jakarta Kemayoran",
+  lnType:"SX", desc:"KREDIT MIKRO", rekening:"81101032799101",
+  nik:"3203012503770011", nama:"GUOHUI CHEN", jangka:"2 tahun",
+  plafond:"Rp 50.000.000", bunga:"6,00 %", tglSkpp:"08-01-2025"
+};
+
+/* ---------------- state ---------------- */
+const blank = () => ({
+  role:null, page:"login", tab:"analysis",
+  a:{
+    control:"CT.C.04", period:"Q2 2026", initiator:"Preparer Branch", reviewer:"Reviewer Branch",
+    attribute:"Seluruh persyaratan dokumen telah dipenuhi sesuai dengan checklist di dalam Sistem.",
+    procedures:PROCEDURES.map(p=>({...p})),
+    docs:DOC_REQS.map(d=>({...d})),
+    scope:[], scopeSubmitted:false,
+    status:"DRAFT",
+    returned:false, prepStep:1, sampleUploaded:false, uploads:{}, analyzed:false, analyzing:false,
+    results:[], nd:{no:"", tgl:"27-Aug-2026", to:"Pimpinan Cabang", from:"Branch Reviewer Team", cause:"", plan:""},
+    trail:[]
+  }
+});
+let S = blank();
+
+const KEY="icofr_poc_v1";
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const r=localStorage.getItem(KEY); if(r){ const p=JSON.parse(r); if(p&&p.a) S=p; } }catch(e){} }
+function log(actor, action){ S.a.trail.unshift({t:new Date().toLocaleString("id-ID"), actor, action}); }
+
+const esc = s => String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nl = s => esc(s).replace(/\n/g,"<br>");
+
+function toast(msg){
+  document.getElementById("toast").innerHTML = `<div class="toast">✔ ${esc(msg)}</div>`;
+  setTimeout(()=>{ const t=document.getElementById("toast"); if(t) t.innerHTML=""; }, 2600);
+}
+function go(page){ S.page=page; save(); render(); window.scrollTo(0,0); }
+
+/* ---------------- chrome ---------------- */
+const ROLE_META = {
+  admin:{who:"Orchestrator — Line 2", scope:"HEAD OFFICE / DIVISI MRO", nav:"Assessments"},
+  preparer:{who:"Preparer Branch", scope:"BRANCH PREPARER — JAKARTA / CABANG JAKARTA KEMAYORAN", nav:"My Assignments"},
+  reviewer:{who:"Reviewer Branch", scope:"BRANCH REVIEWER — JAKARTA / CABANG JAKARTA KEMAYORAN", nav:"Reviews"}
+};
+
+function topbar(){
+  const m = ROLE_META[S.role];
+  return `<div class="topbar"><div class="topbar-in">
+    <div class="brand"><span class="shield">◈</span>ICOFR/Control <small class="mono">v0.1</small></div>
+    <button class="navpill" data-go="${S.role==='admin'?'admin-list':S.role==='preparer'?'prep-dash':'rev-dash'}">${m.nav}</button>
+    <div class="spacer"></div>
+    <div class="who"><b>${esc(m.who)}</b><span class="mono">${esc(m.scope)}</span></div>
+    <button class="signout" data-act="signout">↪ Sign out</button>
+  </div></div>`;
+}
+const crumb = (...p) => `<div class="crumb">${p.map((x,i)=>i===p.length-1?`<b>${esc(x)}</b>`:esc(x)).join(" &nbsp;›&nbsp; ")}</div>`;
+
+/* ---------------- pages ---------------- */
+function pageLogin(){
+  return `<div class="login"><div class="login-card">
+    <div class="brand" style="margin-bottom:6px"><span class="shield">◈</span>ICOFR/Control <small class="mono">v0.1</small></div>
+    <p style="color:var(--muted);margin:0 0 22px;font-size:12.5px">Control self-assessment untuk Internal Control over Financial Reporting. Pilih peran untuk masuk ke prototipe.</p>
+    <button class="role" data-login="admin"><i>L2</i><div><b>Orchestrator — Line 2</b><span>Susun RCM & testing procedure, atur prompt validasi, alokasikan CSA ke unit kerja, pantau progres.</span></div></button>
+    <button class="role" data-login="preparer"><i>L1</i><div><b>Preparer — Line 1</b><span>Unggah sampel transaksi dan dokumen pendukung, jalankan analisis, kirim ke reviewer.</span></div></button>
+    <button class="role" data-login="reviewer"><i>1.5</i><div><b>Reviewer — Line 1.5</b><span>Tinjau insight AI, override verdict bila perlu, tandai selesai, dan terbitkan nota dinas.</span></div></button>
+    <p style="color:var(--muted);font-size:11px;margin:16px 0 0">Data prototipe tersimpan di browser ini saja. <button class="link" data-act="reset">Reset data demo</button></p>
+  </div></div>`;
+}
+
+/* ---- ADMIN ---- */
+function pageAdminList(){
+  const a=S.a;
+  return topbar()+`<div class="wrap">
+    ${crumb("Home","Assessments")}
+    <div class="pagehead"><div><h1>Assessments</h1><div class="sub">Periode <b>${esc(a.period)}</b> · pemetaan kontrol dan alokasi CSA</div></div>
+      <div class="actions"><button class="btn btn-orange" data-go="admin-create">+ New assessment</button></div></div>
+    <div class="card"><div class="tblwrap"><table>
+      <thead><tr><th>ICOFR Control No.</th><th>Control attribute</th><th class="nowrap">Scope allocated</th><th class="nowrap">Period</th><th>Status</th><th class="nowrap">Action</th></tr></thead>
+      <tbody><tr>
+        <td class="mono">${esc(a.control)}</td>
+        <td>${esc(a.attribute)}</td>
+        <td class="nowrap">${a.scope.length} working unit</td>
+        <td class="nowrap">${esc(a.period)}</td>
+        <td><span class="badge ${a.status==="DRAFT"?"b-grey":a.status==="COMPLETED"?"b-pass":"b-navy"}">${esc(a.status)}</span></td>
+        <td><button class="btn btn-navy btn-sm" data-go="admin-create">Open</button></td>
+      </tr></tbody></table></div></div>
+    <div class="card card-pad"><h2>Monitoring progres</h2>
+      <div class="metarow">
+        <div class="meta"><span>ASSIGNED</span><b>${a.scope.length}</b></div>
+        <div class="meta"><span>IN PROGRESS</span><b>${["IN PROGRESS","UNDER REVIEW"].includes(a.status)?1:0}</b></div>
+        <div class="meta"><span>UNDER REVIEW</span><b>${a.status==="UNDER REVIEW"?1:0}</b></div>
+        <div class="meta"><span>COMPLETED</span><b>${a.status==="COMPLETED"?1:0}</b></div>
+        <div class="meta"><span>EXCEPTION (FAIL)</span><b>${a.results.filter(r=>r.result==="FAIL").length}</b></div>
+      </div></div>
+  </div>`;
+}
+
+function pageAdminCreate(){
+  const a=S.a;
+  return topbar()+`<div class="wrap">
+    ${crumb("Home","Assessments","Create new assessment")}
+    <div class="pagehead"><div><h1>Create New Assessment</h1><div class="sub">Status: <b>${esc(a.scopeSubmitted?"Dispatched":"Draft")}</b></div></div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-go="admin-list">← Back to list</button>
+        <button class="btn btn-ghost" data-act="admin-save">Save as draft</button>
+        <button class="btn btn-orange" data-act="dispatch" ${a.scope.length?"":"disabled"}>Dispatch CSA</button>
+      </div></div>
+
+    <div class="card card-pad">
+      <h2>Control details</h2>
+      <div class="grid2">
+        <div class="field"><label class="f">CONTROL INITIATOR</label><input type="text" value="${esc(a.initiator)}" data-bind="initiator"></div>
+        <div class="field"><label class="f">CONTROL REVIEWER</label><input type="text" value="${esc(a.reviewer)}" data-bind="reviewer"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="f">ICOFR CONTROL NUMBER</label><input type="text" value="${esc(a.control)}" data-bind="control"></div>
+        <div class="field"><label class="f">ASSESSMENT PERIOD</label>
+          <select data-bind="period">${["Q1 2026","Q2 2026","Q3 2026","Q4 2026"].map(p=>`<option ${p===a.period?"selected":""}>${p}</option>`).join("")}</select></div>
+      </div>
+
+      <div class="sec-label">CONTROL ATTRIBUTES</div>
+      <div class="tblwrap"><table><thead><tr><th class="nowrap">Control number</th><th class="nowrap">Attribute no.</th><th>Control attributes</th></tr></thead>
+        <tbody><tr><td class="mono nowrap">${esc(a.control)}</td><td>1</td><td>${esc(a.attribute)}</td></tr></tbody></table></div>
+
+      <div class="sec-label">TESTING PROCEDURES</div>
+      <div class="tblwrap"><table><thead><tr><th class="nowrap">Step</th><th>Procedure detail</th></tr></thead><tbody>
+        ${a.procedures.map(p=>`<tr><td>${p.step}</td><td>${nl(p.text)}</td></tr>`).join("")}
+      </tbody></table></div>
+
+      <div class="sec-label">SUPPORTING DOCUMENTS &amp; AI VALIDATION PROMPTS</div>
+      <div class="tblwrap"><table><thead class="navy"><tr><th style="width:50px">No.</th><th style="width:32%">Supporting document</th><th>Additional validation prompt</th><th class="nowrap">Action</th></tr></thead><tbody>
+        ${a.docs.map(d=>`<tr><td>${d.no}</td><td>${esc(d.name)}</td>
+          <td>${d.prompt?`<div class="hint">${nl(d.prompt)}</div>`:`<span style="color:var(--muted);font-style:italic">Belum ada prompt tambahan.</span>`}</td>
+          <td><button class="btn btn-ghost btn-sm" data-prompt="${d.no}">✨ Configure</button></td></tr>`).join("")}
+      </tbody></table></div>
+
+      <div class="sec-label">ASSESSMENT SCOPE ALLOCATION</div>
+      <div class="tblwrap"><table><thead><tr><th>Mapping level</th><th>Organizational area</th><th class="nowrap">Org unit ID</th><th>Organizational unit</th><th class="nowrap">Working unit ID</th><th>Working unit</th><th class="nowrap">Action</th></tr></thead><tbody>
+        ${a.scope.length? a.scope.map((s,i)=>`<tr><td>${esc(s.level||"Working Unit")}</td><td>${esc(s.area)}</td><td class="mono">${esc(s.orgId)}</td><td>${esc(s.orgName)}</td><td class="mono">${esc(s.wuId)}</td><td>${esc(s.wuName)}</td><td><button class="btn btn-danger btn-sm" data-unscope="${i}">Remove</button></td></tr>`).join("")
+        : `<tr><td colspan="7" class="center-empty">Belum ada alokasi. Klik “Map organizational scope” untuk menetapkan unit kerja.</td></tr>`}
+      </tbody></table></div>
+      <div style="margin-top:12px"><button class="btn btn-o" data-act="mapscope">+ Map organizational scope</button></div>
+    </div>
+  </div>`;
+}
+
+/* ---- PREPARER ---- */
+function pagePrepDash(){
+  const a=S.a, dispatched = a.scope.length>0;
+  const rows = dispatched && a.status!=="COMPLETED";
+  return topbar()+`<div class="wrap">
+    <div class="card card-pad" style="display:flex;gap:14px;align-items:center">
+      <span class="shield" style="width:44px;height:44px;font-size:15px">PB</span>
+      <div><b style="font-size:16px;color:var(--blue-head)">Preparer Branch</b>
+        <div class="sub">Branch Team — Jakarta · <span class="mono">preparer.branch@icofr.io</span></div></div>
+    </div>
+    <div class="card card-pad"><div class="grid2">
+      <div class="field"><label class="f">BRANCH</label><input type="text" value="Cabang Jakarta Kemayoran" readonly></div>
+      <div class="field"><label class="f">PERIOD (QUARTERLY)</label><input type="text" value="${esc(a.period)}" readonly></div>
+    </div></div>
+    <h2 style="font-size:17px;color:var(--ink);letter-spacing:.02em">Assessment work</h2>
+    <div class="sec-label">ACTIVE ASSIGNMENTS</div>
+    <div class="card"><div class="tblwrap"><table>
+      <thead><tr><th>Working unit</th><th class="nowrap">ICOFR control no.</th><th class="nowrap">Doc completeness exception</th><th class="nowrap">Period</th><th>Status</th><th class="nowrap">Action</th></tr></thead>
+      <tbody>${rows?`<tr>
+        <td>Unit Kerja 01</td><td class="mono">${esc(a.control)}</td>
+        <td class="nowrap">${a.analyzed?a.results.filter(r=>r.result==="FAIL").length:0} / ${a.procedures.length}</td>
+        <td class="nowrap">${esc(a.period)}</td>
+        <td><span class="badge ${a.status==="ASSIGNED"?"b-grey":"b-info"}">${esc(a.status)}</span></td>
+        <td><button class="btn btn-navy btn-sm" data-go="prep-detail">See details</button></td>
+      </tr>`:`<tr><td colspan="6" class="center-empty">Belum ada penugasan. Orchestrator perlu men-dispatch CSA terlebih dulu.</td></tr>`}</tbody>
+    </table></div></div>
+    <div class="sec-label">AWAITING / COMPLETED</div>
+    <div class="card"><div class="tblwrap"><table>
+      <thead><tr><th>Working unit</th><th class="nowrap">ICOFR control no.</th><th class="nowrap">Period</th><th>Status</th></tr></thead>
+      <tbody>${(a.status==="UNDER REVIEW"||a.status==="COMPLETED")?`<tr><td>Unit Kerja 01</td><td class="mono">${esc(a.control)}</td><td>${esc(a.period)}</td><td><span class="badge b-navy">${esc(a.status)}</span></td></tr>`:`<tr><td colspan="4" class="center-empty">Nothing here yet.</td></tr>`}</tbody>
+    </table></div></div>
+  </div>`;
+}
+
+function pagePrepDetail(){
+  const a=S.a;
+  const head = `${crumb("Home","Assessment Work","Assessment Details")}
+    <div class="pagehead"><div><h1>Assessment Details</h1>
+      <div class="sub">Status: <b>${esc(a.status)}</b> · Working Unit: <b>Unit Kerja 01</b></div></div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-go="prep-dash">← Back to menu</button>
+        <button class="btn btn-danger" data-act="discard">Discard</button>
+        <button class="btn btn-o" data-act="savedraft">Save as draft</button>
+        ${a.prepStep===1
+          ? `<button class="btn btn-orange" data-act="next" ${a.sampleUploaded?"":"disabled"}>Next</button>`
+          : `<button class="btn btn-ghost" data-act="back1">← Back to upload data</button>
+             <button class="btn btn-orange" data-act="analyze" ${uploadCount()===3&&!a.analyzing?"":"disabled"}>${a.analyzing?"Analysing…":"Analyse supporting documents"}</button>
+             <button class="btn btn-navy" data-act="submit" ${a.analyzed?"":"disabled"}>Submit to reviewer</button>`}
+      </div></div>
+    <div class="steps">
+      <div class="step ${a.prepStep===1?"on":""}"><i>1</i> Upload sample data</div>
+      <div class="step ${a.prepStep===2?"on":""}"><i>2</i> Supporting documents</div>
+    </div>`;
+  return topbar()+`<div class="wrap">${head}${a.prepStep===1?prepStep1():prepStep2()}</div>`;
+}
+
+function uploadCount(){ return Object.keys(S.a.uploads).length; }
+
+function prepStep1(){
+  const a=S.a;
+  return `<div class="card card-pad">
+    <h2>Control details</h2>
+    <div class="metarow" style="margin-bottom:6px">
+      <div class="meta"><span>CONTROL INITIATOR</span><b>${esc(a.initiator)}</b></div>
+      <div class="meta"><span>CONTROL REVIEWER</span><b>${esc(a.reviewer)}</b></div>
+      <div class="meta"><span>ASSESSMENT PERIOD</span><b>${esc(a.period)}</b></div>
+    </div>
+    <div class="sec-label">TESTING PROCEDURES</div>
+    <div class="tblwrap"><table><thead><tr><th class="nowrap">Control number</th><th class="nowrap">Step</th><th>Testing procedure</th></tr></thead><tbody>
+      ${a.procedures.map(p=>`<tr><td class="mono nowrap">${esc(a.control)}</td><td>${p.step}</td><td>${nl(p.text)}</td></tr>`).join("")}
+    </tbody></table></div>
+
+    <div class="sec-label">SUPPORTING DOCUMENTS REQUIRED &amp; AI VALIDATION PROMPTS</div>
+    <div class="tblwrap"><table><thead class="navy"><tr><th style="width:50px">No.</th><th style="width:34%">Supporting document name</th><th>Additional validation prompt</th></tr></thead><tbody>
+      ${a.docs.map(d=>`<tr><td>${d.no}</td><td>${esc(d.name)}</td><td>${d.prompt?`<div class="hint">${nl(d.prompt)}</div>`:`<span style="color:var(--muted);font-style:italic">No custom validation prompt set.</span>`}</td></tr>`).join("")}
+    </tbody></table></div>
+  </div>
+
+  <div class="card card-pad">
+    <h2>Upload data</h2>
+    <p class="sub" style="margin-top:0">Unduh template penilaian <button class="link" data-act="template">di sini</button>, lalu unggah kembali berisi sampel transaksi.</p>
+    ${a.sampleUploaded ? `
+      <div class="card" style="margin:0 0 14px"><div class="card-pad" style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:20px">📄</span>
+        <div><b>Sample.xlsx</b><div class="sub mono" style="font-size:10.5px">application/vnd.openxmlformats-officedocument.spreadsheetml.sheet · 0.01 MB</div></div>
+        <div class="spacer"></div><button class="btn btn-danger btn-sm" data-act="delsample">Remove</button>
+      </div></div>
+      <div class="sec-label">PARSED TRANSACTION SAMPLES</div>
+      <p class="sub" style="margin-top:0">Menampilkan 1 dari 1 baris. Lanjut ke langkah 2 untuk mengunggah dokumen pendukung.</p>
+      <div class="tblwrap"><table><thead><tr><th>#</th><th>Sample</th><th>Regional</th><th>Branch</th><th>LN Type</th><th>Desc</th><th>Nomor rekening</th><th>NIK</th><th>Nama pemohon</th></tr></thead>
+      <tbody><tr><td>1</td><td>${esc(SAMPLE_ROW.sample)}</td><td>${esc(SAMPLE_ROW.regional)}</td><td>${esc(SAMPLE_ROW.branch)}</td><td>${esc(SAMPLE_ROW.lnType)}</td><td>${esc(SAMPLE_ROW.desc)}</td><td class="mono">${esc(SAMPLE_ROW.rekening)}</td><td class="mono">${esc(SAMPLE_ROW.nik)}</td><td>${esc(SAMPLE_ROW.nama)}</td></tr></tbody></table></div>
+    ` : `
+      <button class="btn btn-o" style="width:100%;padding:34px" data-act="uploadsample">⬆ &nbsp; Klik untuk mengunggah Sample.xlsx</button>
+    `}
+  </div>`;
+}
+
+function prepStep2(){
+  const a=S.a, up=uploadCount();
+  const valid = a.analyzed ? a.docs.filter(d=>a.uploads[d.no]).length : 0;
+  return `<div class="card card-pad">
+    <h2>Control details</h2>
+    <div class="sec-label">SUPPORTING DOCUMENTS BY SAMPLE</div>
+    <p class="sub" style="margin-top:0">Buka sampel untuk mengunggah atau mengganti dokumennya. Analisis dan pengiriman berlaku untuk seluruh penugasan.</p>
+
+    <div class="samplebar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <b class="mono" style="color:var(--blue-head)">SMPL-1</b>
+        <span class="badge ${up===3?(a.analyzed?"b-pass":"b-info"):"b-info"}">${up===3?(a.analyzed?"ANALYSED":"READY TO ANALYSE"):"ACTION REQUIRED"}</span>
+        <div class="spacer"></div>
+        <span class="sub">${a.analyzed?valid:0}/3 valid · ${up}/3 uploaded · ${3-up} missing${up===3&&!a.analyzed?" · 3 awaiting analysis":""}</span>
+      </div>
+      <div class="metarow">
+        <div class="meta"><span>SAMPLE</span><b>${esc(SAMPLE_ROW.sample)}</b></div>
+        <div class="meta"><span>REGIONAL</span><b>${esc(SAMPLE_ROW.regional)}</b></div>
+        <div class="meta"><span>BRANCH</span><b>${esc(SAMPLE_ROW.branch)}</b></div>
+        <div class="meta"><span>LN TYPE</span><b>${esc(SAMPLE_ROW.lnType)}</b></div>
+        <div class="meta"><span>DESC</span><b>${esc(SAMPLE_ROW.desc)}</b></div>
+        <div class="meta"><span>NOMOR REKENING</span><b class="mono">${esc(SAMPLE_ROW.rekening)}</b></div>
+        <div class="meta"><span>NIK</span><b class="mono">${esc(SAMPLE_ROW.nik)}</b></div>
+        <div class="meta"><span>NAMA PEMOHON</span><b>${esc(SAMPLE_ROW.nama)}</b></div>
+      </div>
+    </div>
+
+    <div class="tblwrap"><table><thead><tr><th style="width:34%">Document name</th><th>Upload</th><th class="nowrap">Result</th><th>Remarks</th><th class="nowrap">Action</th></tr></thead><tbody>
+      ${a.docs.map(d=>{
+        const f=a.uploads[d.no];
+        const res = a.analyzed && f ? "ANALYSED" : f ? "UPLOADED" : "";
+        return `<tr>
+          <td>${esc(d.name)}${d.prompt?`<div class="hint" style="margin-top:7px">${nl(d.prompt)}</div>`:""}</td>
+          <td>${f?`<span style="color:var(--green)">✓</span> ${esc(f)} <span class="sub">(0.05 MB)</span>`:`<span style="color:var(--muted);font-style:italic">Waiting for upload</span>`}</td>
+          <td class="nowrap">${res?`<span class="badge ${res==="ANALYSED"?"b-pass":"b-navy"}">${res}</span>`:"—"}</td>
+          <td>${f?"—":"Dokumen belum diunggah."}</td>
+          <td>${f?`<button class="btn btn-danger btn-sm" data-deldoc="${d.no}">🗑</button>`:`<button class="btn btn-o btn-sm" data-updoc="${d.no}">⬆ Upload</button>`}</td>
+        </tr>`;
+      }).join("")}
+    </tbody></table></div>
+    ${up<3?`<div class="note">Lengkapi dokumen yang belum diunggah, lalu jalankan “Analyse supporting documents” di tingkat penugasan.</div>`:""}
+    ${a.analyzing?`<div class="note">Analisis berjalan… mencocokkan ${a.procedures.length} testing procedure terhadap 3 dokumen.</div>`:""}
+    ${a.analyzed?`<div class="note" style="background:var(--green-bg);color:var(--green)">Analisis selesai. ${a.results.filter(r=>r.result==="FAIL").length} dari ${a.results.length} langkah gagal. Kirim ke reviewer untuk ditinjau.</div>`:""}
+  </div>`;
+}
+
+/* ---- REVIEWER ---- */
+function pageRevDash(){
+  const a=S.a, pending = a.status==="UNDER REVIEW", done = a.status==="COMPLETED";
+  const returned = a.returned && !pending && !done;
+  return topbar()+`<div class="wrap">
+    ${crumb("Home","Reviewer Dashboard")}
+    <div class="pagehead"><div><h1>Reviewer Dashboard</h1><div class="sub">Branch: <b>Cabang Jakarta Kemayoran</b> · Periode <b>${esc(a.period)}</b></div></div>
+      ${done?`<div class="actions"><button class="btn btn-orange" data-go="rev-report">Generate CSA report</button></div>`:""}
+    </div>
+    <div class="sec-label">PENDING REVIEW</div>
+    <div class="card"><div class="tblwrap"><table>
+      <thead><tr><th>Working unit</th><th class="nowrap">ICOFR control no.</th><th class="nowrap">Exceptions</th><th class="nowrap">Period</th><th>Status</th><th class="nowrap">Action</th></tr></thead>
+      <tbody>${(pending||done||returned)?`<tr>
+        <td>Unit Kerja 01</td><td class="mono">${esc(a.control)}</td>
+        <td class="nowrap">${a.results.filter(r=>r.result==="FAIL").length} fail</td>
+        <td class="nowrap">${esc(a.period)}</td>
+        <td><span class="badge ${done?"b-pass":returned?"b-grey":"b-info"}">${returned?"RETURNED TO PREPARER":esc(a.status)}</span></td>
+        <td>${returned?`<span class="sub">Menunggu perbaikan preparer</span>`:`<button class="btn btn-navy btn-sm" data-go="rev-detail">${done?"View":"Review"}</button>`}</td>
+      </tr>`:`<tr><td colspan="6" class="center-empty">Belum ada assessment yang dikirim preparer.</td></tr>`}</tbody>
+    </table></div></div>
+  </div>`;
+}
+
+function pageRevDetail(){
+  const a=S.a;
+  return topbar()+`<div class="wrap">
+    ${crumb("Home","Assessment Work","Assessment Details")}
+    <div class="pagehead"><div><h1>Assessment Details</h1>
+      <div class="sub">Status: <b>${esc(a.status)}</b> · Working Unit: <b>Unit Kerja 01</b></div></div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-go="rev-dash">← Back to menu</button>
+        ${a.status==="COMPLETED"?`<button class="btn btn-orange" data-go="rev-report">Generate report</button>`:`
+        <button class="btn btn-o" data-act="reject">✕ Reject document</button>
+        <button class="btn btn-orange" data-act="complete">Mark as complete</button>`}
+      </div></div>
+    <div class="tabs">
+      <button class="tab ${S.tab==="analysis"?"on":""}" data-tab="analysis">Analysis result</button>
+      <button class="tab ${S.tab==="control"?"on":""}" data-tab="control">Control detail</button>
+      <button class="tab ${S.tab==="trail"?"on":""}" data-tab="trail">Audit trail</button>
+    </div>
+    ${S.tab==="analysis"?revAnalysis():S.tab==="control"?revControl():revTrail()}
+  </div>`;
+}
+
+function revAnalysis(){
+  const a=S.a;
+  return `<div class="samplebar">
+    <div style="display:flex;gap:10px;align-items:center"><span class="sub" style="letter-spacing:.07em;font-weight:700">SELECTED SAMPLE</span>
+      <b class="mono" style="color:var(--blue-head);font-size:15px">SMPL-1</b></div>
+    <div class="metarow">
+      <div class="meta"><span>REGIONAL</span><b>${esc(SAMPLE_ROW.regional)}</b></div>
+      <div class="meta"><span>BRANCH</span><b>${esc(SAMPLE_ROW.branch)}</b></div>
+      <div class="meta"><span>LN TYPE</span><b>${esc(SAMPLE_ROW.lnType)}</b></div>
+      <div class="meta"><span>DESC</span><b>${esc(SAMPLE_ROW.desc)}</b></div>
+      <div class="meta"><span>NOMOR REKENING</span><b class="mono">${esc(SAMPLE_ROW.rekening)}</b></div>
+      <div class="meta"><span>NIK</span><b class="mono">${esc(SAMPLE_ROW.nik)}</b></div>
+    </div></div>
+
+  <h2 style="font-size:19px;color:var(--blue-head);margin:0 0 12px">Analysis Details — Sample SMPL-1</h2>
+  <div class="insight"><h3>Insight summary analysis</h3><p>${esc(SUMMARY)}</p></div>
+
+  <div class="tblwrap"><table><thead><tr>
+    <th class="nowrap">Control number</th><th class="nowrap">Sample ID</th><th class="nowrap">Testing procedure step</th>
+    <th style="width:24%">Testing procedure</th><th class="nowrap">Result</th><th style="width:28%">Insight</th>
+    <th style="width:14%">Reviewer justification</th><th class="nowrap">Action</th></tr></thead><tbody>
+    ${a.results.map(r=>{
+      const cls = r.result==="PASS"?"b-pass":"b-fail";
+      const label = r.overridden?`${r.result} (Overridden)`:r.result;
+      return `<tr>
+        <td class="mono nowrap">${esc(a.control)}</td><td class="mono nowrap">SMPL-1</td><td>${r.step}</td>
+        <td>${nl(r.procedure)}</td>
+        <td class="nowrap"><span class="badge ${cls}">${esc(label)}</span></td>
+        <td>${esc(r.insight)}</td>
+        <td>${r.justification?`<div style="font-style:italic">${esc(r.justification)}</div>${r.hallucination?`<div style="margin-top:6px"><span class="badge b-navy">AI HALLUCINATES / NOT PERFORMING WELL</span></div>`:""}`:"—"}</td>
+        <td class="nowrap">
+          <button class="btn btn-ghost btn-sm" data-evidence="${r.step}" title="Preview AI rationale and supporting evidence">👁</button>
+          ${a.status==="COMPLETED"?"":`<button class="link" style="display:block;margin-top:6px" data-override="${r.step}">OVERRIDE</button>`}
+        </td>
+      </tr>`;
+    }).join("")}
+  </tbody></table></div>`;
+}
+
+function revControl(){
+  const a=S.a;
+  return `<div class="card card-pad">
+    <div class="metarow" style="margin-bottom:8px">
+      <div class="meta"><span>CONTROL INITIATOR</span><b>${esc(a.initiator)}</b></div>
+      <div class="meta"><span>CONTROL REVIEWER</span><b>${esc(a.reviewer)}</b></div>
+      <div class="meta"><span>ASSESSMENT PERIOD</span><b>${esc(a.period)}</b></div>
+    </div>
+    <div class="sec-label">CONTROL ATTRIBUTES</div>
+    <div class="tblwrap"><table><thead><tr><th class="nowrap">Control number</th><th class="nowrap">Attribute no.</th><th>Control attributes</th></tr></thead>
+      <tbody><tr><td class="mono nowrap">${esc(a.control)}</td><td>1</td><td>${esc(a.attribute)}</td></tr></tbody></table></div>
+    <div class="sec-label">TESTING PROCEDURES</div>
+    <div class="tblwrap"><table><thead><tr><th class="nowrap">Step</th><th>Testing procedure</th></tr></thead><tbody>
+      ${a.procedures.map(p=>`<tr><td>${p.step}</td><td>${nl(p.text)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="sec-label">SUPPORTING DOCUMENTS SUBMITTED</div>
+    <div class="tblwrap"><table><thead class="navy"><tr><th style="width:50px">No.</th><th style="width:34%">Document</th><th>File</th><th>Validation prompt</th></tr></thead><tbody>
+      ${a.docs.map(d=>`<tr><td>${d.no}</td><td>${esc(d.name)}</td><td>${a.uploads[d.no]?esc(a.uploads[d.no]):"—"}</td><td>${d.prompt?`<div class="hint">${nl(d.prompt)}</div>`:"—"}</td></tr>`).join("")}
+    </tbody></table></div>
+  </div>`;
+}
+
+function revTrail(){
+  const a=S.a;
+  return `<div class="card"><div class="tblwrap"><table>
+    <thead><tr><th class="nowrap" style="width:190px">Timestamp</th><th class="nowrap" style="width:180px">Actor</th><th>Action</th></tr></thead>
+    <tbody>${a.trail.length?a.trail.map(t=>`<tr><td class="mono nowrap">${esc(t.t)}</td><td>${esc(t.actor)}</td><td>${esc(t.action)}</td></tr>`).join("")
+      :`<tr><td colspan="3" class="center-empty">Belum ada aktivitas tercatat.</td></tr>`}</tbody>
+  </table></div></div>`;
+}
+
+function pageRevReport(){
+  const a=S.a, nd=a.nd;
+  const fails=a.results.filter(r=>r.result==="FAIL").length, ov=a.results.filter(r=>r.overridden).length;
+  return topbar()+`<div class="wrap">
+    ${crumb("Home","Reviewer Dashboard","Generate Report")}
+    <div class="pagehead"><div><h1>Generate CSA Report</h1><div class="sub">Branch: <b>Cabang Jakarta Kemayoran</b></div></div>
+      <div class="actions"><button class="btn btn-ghost" data-go="rev-dash">← Back to dashboard</button></div></div>
+    <div class="split">
+      <div class="card card-pad">
+        <h2>1. Report document metadata</h2>
+        <div class="grid2">
+          <div class="field"><label class="f">NOMOR NOTA DINAS</label><input type="text" placeholder="e.g. ND-045/ICM/2026" value="${esc(nd.no)}" data-nd="no"></div>
+          <div class="field"><label class="f">TANGGAL NOTA DINAS</label><input type="text" value="${esc(nd.tgl)}" data-nd="tgl"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="f">KEPADA (TO)</label><input type="text" value="${esc(nd.to)}" data-nd="to"></div>
+          <div class="field"><label class="f">DARI (FROM)</label><input type="text" value="${esc(nd.from)}" data-nd="from"></div>
+        </div>
+        <div class="sec-label">TINDAK LANJUT &amp; ANALISIS (OPSIONAL)</div>
+        <div class="field"><label class="f">ANALISIS PENYEBAB</label><textarea placeholder="Tuliskan analisis akar penyebab…" data-nd="cause">${esc(nd.cause)}</textarea></div>
+        <div class="field"><label class="f">RENCANA TINDAK LANJUT</label><textarea placeholder="Tuliskan rencana tindak lanjut…" data-nd="plan">${esc(nd.plan)}</textarea></div>
+        <div class="sec-label">RINGKASAN HASIL</div>
+        <div class="metarow">
+          <div class="meta"><span>SAMPEL DIUJI</span><b>1</b></div>
+          <div class="meta"><span>LANGKAH PENGUJIAN</span><b>${a.results.length}</b></div>
+          <div class="meta"><span>EXCEPTION</span><b>${fails}</b></div>
+          <div class="meta"><span>OVERRIDE REVIEWER</span><b>${ov}</b></div>
+        </div>
+      </div>
+      <div class="card card-pad" style="align-self:start">
+        <h2>Download options</h2>
+        <p class="sub" style="margin-top:0">Pratinjau paket kepatuhan yang tersusun otomatis sebelum pengiriman akhir.</p>
+        <button class="btn btn-o" style="width:100%;margin-bottom:10px;text-align:left" data-act="prev-word">📄 &nbsp; Preview Word report (Nota Dinas)</button>
+        <button class="btn btn-o" style="width:100%;text-align:left" data-act="prev-excel">📊 &nbsp; Preview detailed working paper</button>
+        <div class="note" style="margin-top:14px">Prototipe: unduhan berkas belum aktif. Tombol ini menampilkan pratinjau isi dokumen yang akan dihasilkan.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- modals ---------------- */
+let M = null;
+function openModal(kind, data){ M={kind,data}; renderModal(); }
+function closeModal(){ M=null; renderModal(); }
+
+function renderModal(){
+  const host=document.getElementById("modal");
+  if(!M){ host.innerHTML=""; return; }
+  const a=S.a;
+  let body="";
+
+  if(M.kind==="prompt"){
+    const d=a.docs.find(x=>x.no===M.data);
+    body=`<div class="scrim"><div class="modal lg">
+      <div class="modal-h"><h3>Configure validation prompt</h3><button class="x" data-act="closemodal">✕</button></div>
+      <div class="modal-b">
+        <p class="sub" style="margin-top:0">For: <b>${esc(d.name)}</b></p>
+        <div class="sec-label">TEST PROCEDURE</div>
+        <div class="hint">${a.procedures.map(p=>`${p.step}. ${nl(p.text)}`).join("<br>")}</div>
+        <div class="sec-label" style="margin-top:16px">ADDITIONAL VALIDATION PROMPT DETAILS
+          <button class="btn btn-navy btn-sm" data-act="genprompt" style="margin-left:auto">✨ Generate with AI</button></div>
+        <textarea id="promptbox" style="min-height:170px" placeholder="Tuliskan aturan validasi tambahan, satu baris per aturan…">${esc(d.prompt)}</textarea>
+      </div>
+      <div class="modal-f"><button class="btn btn-ghost" data-act="closemodal">Cancel</button>
+        <button class="btn btn-orange" data-act="saveprompt">Save prompt</button></div>
+    </div></div>`;
+  }
+
+  if(M.kind==="scope"){
+    const lvl=M.data.level, sel=M.data.sel;
+    const on = id => sel.includes(id) ? "checked" : "";
+    let rows="", cols="";
+    if(lvl==="Organizational Area"){
+      cols=`<th style="width:44px"></th><th>Organizational area</th><th class="nowrap">Cabang tercakup</th><th class="nowrap">Working unit</th>`;
+      rows=[...new Set(ORG_UNITS.map(o=>o.area))].map(area=>{
+        const orgs=ORG_UNITS.filter(o=>o.area===area);
+        return `<tr data-search="${esc(area.toLowerCase())} ${esc(orgs.map(o=>o.name).join(" ").toLowerCase())}">
+          <td><input type="checkbox" data-pick="AREA::${esc(area)}" ${on("AREA::"+area)}></td>
+          <td>${esc(area)}</td><td>${orgs.length}</td><td>${orgs.length*2}</td></tr>`;
+      }).join("");
+    } else if(lvl==="Organizational Unit"){
+      cols=`<th style="width:44px"></th><th>Organizational unit</th><th class="nowrap">Org unit ID</th><th class="nowrap">Working unit</th>`;
+      rows=ORG_UNITS.map(o=>`<tr data-search="${esc((o.name+" "+o.area+" "+o.id).toLowerCase())}">
+        <td><input type="checkbox" data-pick="ORG::${esc(o.id)}" ${on("ORG::"+o.id)}></td>
+        <td>${esc(o.name)}</td><td class="mono">${esc(o.id)}</td><td>2</td></tr>`).join("");
+    } else {
+      cols=`<th style="width:44px"></th><th>Working unit</th><th class="nowrap">Working unit ID</th><th class="nowrap">Testing assignments</th>`;
+      rows=ORG_UNITS.map(o=>`
+        <tr class="grouphead" data-group="${esc(o.id)}" style="background:rgba(11,47,122,.06)"><td></td><td colspan="3"><b class="sub" style="letter-spacing:.05em">ORGANIZATIONAL UNIT: ${esc(o.name.toUpperCase())}</b></td></tr>
+        ${["01","02"].map(w=>{
+          const id=`${o.id}-${w}`;
+          return `<tr data-of="${esc(o.id)}" data-search="${esc((o.name+" "+o.area+" "+id+" unit kerja "+w).toLowerCase())}">
+            <td><input type="checkbox" data-pick="${id}" ${on(id)}></td>
+            <td>Unit Kerja ${w}</td><td class="mono">${id}</td><td>—</td></tr>`;
+        }).join("")}`).join("");
+    }
+    body=`<div class="scrim"><div class="modal lg">
+      <div class="modal-h"><h3>Map assignment scope</h3><button class="x" data-act="closemodal">✕</button></div>
+      <div class="modal-b">
+        <p class="sub" style="margin-top:0">Pilih tingkat pemetaan lalu tentukan unit tujuan di bawah. Pemetaan pada level area atau cabang otomatis diturunkan ke seluruh unit kerja di bawahnya.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+          <span class="sub" style="font-weight:700;letter-spacing:.07em">MAPPING LEVEL:</span>
+          ${["Organizational Area","Organizational Unit","Working Unit"].map(l=>`<button class="btn ${l===lvl?"btn-navy":"btn-ghost"} btn-sm" data-level="${l}">${l}</button>`).join("")}
+        </div>
+        <input type="text" id="scopesearch" placeholder="Cari area, cabang, atau unit kerja…" style="margin-bottom:12px">
+        <div class="tblwrap" style="max-height:340px;overflow-y:auto"><table>
+          <thead><tr>${cols}</tr></thead><tbody>${rows}</tbody></table></div>
+        <div id="scopeempty" class="center-empty" style="display:none">Tidak ada unit yang cocok dengan pencarian.</div>
+      </div>
+      <div class="modal-f"><button class="btn btn-ghost" data-act="closemodal">Cancel</button>
+        <button class="btn btn-orange" data-act="addscope">Add to scope</button></div>
+    </div></div>`;
+  }
+
+  if(M.kind==="override"){
+    const r=a.results.find(x=>x.step===M.data);
+    body=`<div class="scrim"><div class="modal">
+      <div class="modal-h"><h3>Override AI verdict</h3><button class="x" data-act="closemodal">✕</button></div>
+      <div class="modal-b">
+        <p class="sub" style="margin-top:0">Anda mengubah verdict untuk sampel <b class="mono">SMPL-1</b> (Step ${r.step}).</p>
+        <div class="field"><label class="f">NEW VERDICT</label>
+          <select id="ovVerdict"><option value="PASS" ${r.result==="FAIL"?"selected":""}>PASS</option><option value="FAIL" ${r.result==="PASS"?"selected":""}>FAIL</option></select></div>
+        <div class="field"><label class="f">REVIEWER JUSTIFICATION *</label>
+          <textarea id="ovText" placeholder="Jelaskan alasan Anda mengubah verdict AI ini…">${esc(r.justification||"")}</textarea></div>
+        <label style="display:flex;gap:10px;align-items:flex-start;background:var(--orange-soft);padding:12px;border-radius:var(--radius);cursor:pointer">
+          <input type="checkbox" id="ovHallu" ${r.hallucination?"checked":""} style="margin-top:2px">
+          <span><b style="font-size:12.5px">Flag possible AI hallucination</b>
+          <span class="sub" style="display:block">Pilih ini bila verdict AI tampak tidak andal atau butuh bukti tambahan.</span></span>
+        </label>
+      </div>
+      <div class="modal-f"><button class="btn btn-ghost" data-act="closemodal">Cancel</button>
+        <button class="btn btn-navy" data-act="saveoverride">Save override</button></div>
+    </div></div>`;
+  }
+
+  if(M.kind==="evidence"){
+    const r=a.results.find(x=>x.step===M.data);
+    body=`<div class="scrim"><div class="modal lg">
+      <div class="modal-h"><h3>AI insight evidence</h3><button class="x" data-act="closemodal">✕</button></div>
+      <div class="modal-b">
+        <p class="sub" style="margin-top:0">Sample <b class="mono">SMPL-1</b> · Testing procedure step ${r.step}</p>
+        <div class="split">
+          <div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+              <span class="badge ${r.result==="PASS"?"b-pass":"b-fail"}">${esc(r.result)}</span>
+              <span class="sub">AI confidence: ${r.conf}%</span>
+            </div>
+            <div class="sec-label" style="margin-top:0">TESTING PROCEDURE</div>
+            <div style="font-size:12px">${nl(r.procedure)}</div>
+            <div class="sec-label">AI RATIONALE</div>
+            <div style="border-left:3px solid var(--navy);padding:10px 12px;background:rgba(11,47,122,.06);font-size:12px">${esc(r.insight)}</div>
+            <div class="sec-label">EVIDENCE USED</div>
+            <div class="evbox">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <b style="font-size:12.5px">${esc(r.evLabel)} — dicocokkan terhadap sampel transaksi.</b>
+                <span class="badge ${r.verdictEv==="MATCH"?"b-pass":"b-fail"}" style="margin-left:auto">${esc(r.verdictEv)}</span>
+              </div>
+              <div class="sub" style="margin-top:6px">Source: <span style="color:var(--orange)">◈ ${esc(r.source)}</span></div>
+              <div class="evgrid">
+                <div class="evcell"><span>SAMPLE DATA · ${esc(r.evLabel)}</span><b class="mono">${esc(r.sampleVal)}</b>
+                  <div class="sub" style="font-size:10px;margin-top:5px">Grounded in the uploaded transaction sample.</div></div>
+                <div class="evcell"><span>EVIDENCE OBSERVED · ${esc(r.evLabel)}</span><b class="mono">${esc(r.evVal)}</b>
+                  <div class="sub" style="font-size:10px;margin-top:5px">Diekstrak dari dokumen pendukung.</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label" style="margin-top:0">DOCUMENT PREVIEW</div>
+            <div class="sub" style="margin-bottom:8px">${esc(r.source)}</div>
+            ${docPreview()}
+          </div>
+        </div>
+      </div>
+      <div class="modal-f"><button class="btn btn-ghost" data-act="closemodal">Close</button></div>
+    </div></div>`;
+  }
+
+  if(M.kind==="word"||M.kind==="excel"){
+    body=`<div class="scrim"><div class="modal lg">
+      <div class="modal-h"><h3>${M.kind==="word"?"Nota Dinas — preview":"Working paper — preview"}</h3><button class="x" data-act="closemodal">✕</button></div>
+      <div class="modal-b">${M.kind==="word"?wordPreview():excelPreview()}</div>
+      <div class="modal-f"><button class="btn btn-ghost" data-act="closemodal">Close</button></div>
+    </div></div>`;
+  }
+
+  host.innerHTML=body;
+}
+
+function docPreview(){
+  const R=SAMPLE_ROW;
+  return `<div class="docprev">
+    <h4>FORM REKOMENDASI PINJAMAN</h4>
+    <b>I. IDENTITAS</b>
+    <div class="r"><span>Nama Ymp</span><span>SANAN</span></div>
+    <div class="r"><span>No. KTP</span><span class="mono">3201121200700019</span></div>
+    <div class="r"><span>No. NPWP</span><span class="mono">3201125300850013</span></div>
+    <div class="r"><span>Umur</span><span>54</span></div>
+    <div class="r"><span>Alamat (Sesuai KTP)</span><span>KP SAWAH RT 01 / RW 07</span></div>
+    <div class="r"><span>Kelurahan/Desa</span><span>BOJONG</span></div>
+    <div class="r"><span>Kecamatan</span><span>KEMANG</span></div>
+    <div class="r"><span>Kota/Kabupaten</span><span>BOGOR</span></div>
+    <div class="r"><span>Provinsi</span><span>JAWA BARAT</span></div>
+    <div class="r"><span>No Handphone</span><span class="mono">08505934434</span></div>
+    <div class="r"><span>Status Perkawinan</span><span>Menikah</span></div>
+    <div class="r"><span>Status Tempat Tinggal</span><span>Milik Sendiri</span></div>
+    <div class="r"><span>Umur Usaha</span><span>32 tahun</span></div>
+    <br><b>II. USAHA</b>
+    <div class="r"><span>Tanggal SKPP</span><span>${esc(R.tglSkpp)}</span></div>
+    <div class="r"><span>Bidang Usaha</span><span>Perdagangan Eceran Hasil Bumi</span></div>
+    <div class="r"><span>Lama Usaha</span><span>13 Tahun 8 Bulan</span></div>
+    <div class="r"><span>Laba Rugi</span><span>Rp 7.300.000</span></div>
+    <div class="r"><span>Repayment Capacity</span><span>Rp 4.380.500</span></div>
+    <br><b>III. REKOMENDASI</b>
+    <div class="r"><span>Plafond Pinjaman</span><span>Rp 50.000.000</span></div>
+    <div class="r"><span>Jangka Waktu</span><span><mark style="background:#ffe8b3">24 bulan</mark></span></div>
+    <div class="r"><span>Suku Bunga per Tahun</span><span>6,00 %</span></div>
+    <div class="r"><span>Periode Angsuran</span><span>Bulanan</span></div>
+    <div class="r"><span>Tujuan Penggunaan</span><span>Kredit Investasi</span></div>
+    <div class="r"><span>Tipe Pinjaman / Loan Type</span><span>FSX</span></div>
+    <div class="r"><span>Sisa Pinjaman</span><span>Rp 50.000.000</span></div>
+    <div class="r"><span>Total Eksposure</span><span>Rp 1.966.831</span></div>
+    <div class="r"><span>Biaya Administrasi</span><span>Rp 250.000</span></div>
+    <br><b>IV. CREDIT RISK SCORING</b>
+    <div class="r"><span>Skor Penilaian Risiko Kredit</span><span><mark style="background:#ffd6d6">tidak tersedia</mark></span></div>
+    <div class="r"><span>Grade</span><span>—</span></div>
+  </div>`;
+}
+
+function wordPreview(){
+  const a=S.a,nd=a.nd;
+  const fails=a.results.filter(r=>r.result==="FAIL");
+  return `<div class="docprev" style="font-size:11.5px;line-height:1.8">
+    <div style="text-align:center;font-weight:700;letter-spacing:.08em">NOTA DINAS</div>
+    <div style="text-align:center" class="mono">${esc(nd.no||"ND-___/ICM/2026")}</div><br>
+    <div class="r"><span>Kepada</span><span>: ${esc(nd.to)}</span></div>
+    <div class="r"><span>Dari</span><span>: ${esc(nd.from)}</span></div>
+    <div class="r"><span>Tanggal</span><span>: ${esc(nd.tgl)}</span></div>
+    <div class="r"><span>Perihal</span><span>: Hasil Control Self-Assessment ICOFR ${esc(a.control)} Periode ${esc(a.period)}</span></div>
+    <br>
+    <p>Bersama ini disampaikan hasil pelaksanaan Control Self-Assessment atas kontrol <b>${esc(a.control)}</b> pada Unit Kerja 01, Cabang Jakarta Kemayoran, untuk periode ${esc(a.period)}. Pengujian dilakukan terhadap 1 sampel transaksi kredit mikro dengan ${a.results.length} langkah pengujian.</p>
+    <p><b>Hasil pengujian:</b> ${fails.length} dari ${a.results.length} langkah dinyatakan tidak memenuhi persyaratan.</p>
+    <ol style="padding-left:18px;margin:6px 0">${fails.map(r=>`<li>Step ${r.step} — ${esc(r.insight)}</li>`).join("")}</ol>
+    <p><b>Analisis penyebab:</b> ${esc(nd.cause||"(belum diisi)")}</p>
+    <p><b>Rencana tindak lanjut:</b> ${esc(nd.plan||"(belum diisi)")}</p>
+    <br><p>Demikian disampaikan untuk menjadi perhatian dan ditindaklanjuti.</p>
+    <br><div style="text-align:right">${esc(nd.from)}</div>
+  </div>`;
+}
+
+function excelPreview(){
+  const a=S.a;
+  return `<div class="tblwrap"><table><thead><tr>
+    <th>Control</th><th>Sample</th><th>Step</th><th>Procedure</th><th>AI verdict</th><th>Final verdict</th><th>Confidence</th><th>Evidence source</th><th>Justification</th><th>Hallucination flag</th></tr></thead><tbody>
+    ${a.results.map(r=>`<tr>
+      <td class="mono">${esc(a.control)}</td><td class="mono">SMPL-1</td><td>${r.step}</td>
+      <td>${esc(r.procedure.split("\n")[0])}</td>
+      <td><span class="badge ${r.aiResult==="PASS"?"b-pass":"b-fail"}">${esc(r.aiResult)}</span></td>
+      <td><span class="badge ${r.result==="PASS"?"b-pass":"b-fail"}">${esc(r.result)}</span></td>
+      <td>${r.conf}%</td><td>${esc(r.source)}</td><td>${esc(r.justification||"—")}</td><td>${r.hallucination?"YES":"NO"}</td>
+    </tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+/* keep checkbox choices alive across modal re-renders */
+function capturePicks(){
+  if(!M || M.kind!=="scope") return;
+  const shown=[...document.querySelectorAll("[data-pick]")].map(c=>c.dataset.pick);
+  const checked=[...document.querySelectorAll("[data-pick]:checked")].map(c=>c.dataset.pick);
+  M.data.sel = M.data.sel.filter(id=>!shown.includes(id)).concat(checked);
+}
+function filterScope(q){
+  q=(q||"").trim().toLowerCase();
+  const rows=[...document.querySelectorAll("[data-search]")];
+  rows.forEach(tr=>{ tr.style.display = !q || tr.dataset.search.includes(q) ? "" : "none"; });
+  document.querySelectorAll(".grouphead").forEach(h=>{
+    const kids=rows.filter(r=>r.dataset.of===h.dataset.group && r.style.display!=="none");
+    h.style.display = kids.length ? "" : "none";
+  });
+  const empty=document.getElementById("scopeempty");
+  if(empty) empty.style.display = rows.some(r=>r.style.display!=="none") ? "none" : "";
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const app=document.getElementById("app");
+  const map={
+    "login":pageLogin, "admin-list":pageAdminList, "admin-create":pageAdminCreate,
+    "prep-dash":pagePrepDash, "prep-detail":pagePrepDetail,
+    "rev-dash":pageRevDash, "rev-detail":pageRevDetail, "rev-report":pageRevReport
+  };
+  app.innerHTML = (map[S.page]||pageLogin)();
+  renderModal();
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", e=>{
+  const t=e.target.closest("[data-go],[data-act],[data-login],[data-tab],[data-prompt],[data-override],[data-evidence],[data-updoc],[data-deldoc],[data-unscope],[data-level]");
+  if(!t) return;
+  const a=S.a;
+
+  if(t.dataset.login){
+    S.role=t.dataset.login;
+    go(S.role==="admin"?"admin-list":S.role==="preparer"?"prep-dash":"rev-dash"); return;
+  }
+  if(t.dataset.go){ go(t.dataset.go); return; }
+  if(t.dataset.tab){ S.tab=t.dataset.tab; save(); render(); return; }
+  if(t.dataset.prompt){ openModal("prompt", parseInt(t.dataset.prompt)); return; }
+  if(t.dataset.override){ openModal("override", parseInt(t.dataset.override)); return; }
+  if(t.dataset.evidence){ openModal("evidence", parseInt(t.dataset.evidence)); return; }
+  if(t.dataset.level){ capturePicks(); M.data.level=t.dataset.level; renderModal(); return; }
+  if(t.dataset.unscope){ a.scope.splice(+t.dataset.unscope,1); save(); render(); return; }
+  if(t.dataset.updoc){
+    const no=+t.dataset.updoc;
+    const names={1:"Form Pinjaman.jpg",2:"KTP.pdf",3:"Form Rekomendasi Pinjaman (Credit Scoring).png"};
+    a.uploads[no]=names[no]; a.analyzed=false; a.results=[];
+    log("Preparer Branch",`Mengunggah ${names[no]} untuk SMPL-1.`);
+    save(); render(); toast(`Dokumen terunggah untuk SMPL-1 (${a.docs.find(d=>d.no===no).name})`); return;
+  }
+  if(t.dataset.deldoc){ delete a.uploads[+t.dataset.deldoc]; a.analyzed=false; a.results=[]; save(); render(); return; }
+
+  const act=t.dataset.act;
+  if(act==="signout"){ S.role=null; go("login"); return; }
+  if(act==="reset"){ S=blank(); save(); render(); toast("Data demo direset"); return; }
+  if(act==="closemodal"){ closeModal(); return; }
+
+  /* admin */
+  if(act==="mapscope"){ openModal("scope",{level:"Working Unit", sel:a.scope.map(s=>s.wuId)}); return; }
+  if(act==="addscope"){
+    capturePicks();
+    const wuIds=new Set();
+    M.data.sel.forEach(id=>{
+      if(id.startsWith("AREA::")){
+        const area=id.slice(6);
+        ORG_UNITS.filter(o=>o.area===area).forEach(o=>{ wuIds.add(o.id+"-01"); wuIds.add(o.id+"-02"); });
+      } else if(id.startsWith("ORG::")){
+        const oid=id.slice(5); wuIds.add(oid+"-01"); wuIds.add(oid+"-02");
+      } else wuIds.add(id);
+    });
+    a.scope=[...wuIds].sort().map(id=>{
+      const org=ORG_UNITS.find(o=>id.startsWith(o.id));
+      return {level:M.data.level, area:org.area, orgId:org.id, orgName:org.name, wuId:id, wuName:"Unit Kerja "+id.slice(-2)};
+    });
+    log("Orchestrator — Line 2", `Memetakan ${a.scope.length} working unit ke dalam scope CSA (level: ${M.data.level}).`);
+    closeModal(); save(); render(); toast(`${a.scope.length} working unit ditambahkan ke scope`); return;
+  }
+  if(act==="genprompt"){
+    const d=a.docs.find(x=>x.no===M.data);
+    const box=document.getElementById("promptbox");
+    box.value = d.no===2 ? DOC_REQS[1].prompt
+      : d.no===1 ? "- Pastikan nama pemohon pada Form Permohonan Pinjaman sama persis dengan nama pada sampel transaksi.\n- Pastikan jumlah permohonan tercantum dalam angka dan tidak melebihi plafond pada Form Rekomendasi Pinjaman.\n- Pastikan formulir memuat tanggal pengajuan dan tanda tangan pemohon."
+      : "- Pastikan Skor Penilaian Risiko Kredit (CRS) dari sistem tercantum dan tidak kosong.\n- Pastikan suku bunga per tahun berada pada rentang 5–10 persen.\n- Pastikan jangka waktu dinyatakan dalam satuan yang sama dengan sampel transaksi.";
+    toast("Prompt dihasilkan"); return;
+  }
+  if(act==="saveprompt"){
+    const d=a.docs.find(x=>x.no===M.data);
+    d.prompt=document.getElementById("promptbox").value;
+    log("Orchestrator — Line 2", `Memperbarui prompt validasi untuk ${d.name}.`);
+    closeModal(); save(); render(); toast("Prompt tersimpan"); return;
+  }
+  if(act==="admin-save"){ save(); toast("Draft tersimpan"); return; }
+  if(act==="dispatch"){
+    a.scopeSubmitted=true; a.status="ASSIGNED";
+    log("Orchestrator — Line 2", `CSA ${a.control} didistribusikan ke ${a.scope.length} working unit.`);
+    save(); go("admin-list"); toast("CSA didistribusikan ke preparer"); return;
+  }
+
+  /* preparer */
+  if(act==="template"){ toast("Template Sample.xlsx disiapkan (prototipe)"); return; }
+  if(act==="uploadsample"){
+    a.sampleUploaded=true; a.status="IN PROGRESS";
+    log("Preparer Branch","Mengunggah Sample.xlsx (1 baris sampel terbaca).");
+    save(); render(); toast("Sample.xlsx terunggah — 1 sampel terbaca"); return;
+  }
+  if(act==="delsample"){ a.sampleUploaded=false; a.uploads={}; a.analyzed=false; a.results=[]; save(); render(); return; }
+  if(act==="next"){ a.prepStep=2; save(); render(); return; }
+  if(act==="back1"){ a.prepStep=1; save(); render(); return; }
+  if(act==="savedraft"){ save(); toast("Tersimpan sebagai draft"); return; }
+  if(act==="discard"){ a.sampleUploaded=false; a.uploads={}; a.analyzed=false; a.results=[]; a.prepStep=1; a.status="ASSIGNED"; save(); go("prep-dash"); return; }
+  if(act==="analyze"){
+    a.analyzing=true; save(); render();
+    setTimeout(()=>{
+      a.analyzing=false; a.analyzed=true;
+      a.results = AI_RESULTS.map(r=>({
+        ...r, aiResult:r.result, procedure:PROCEDURES.find(p=>p.step===r.step).text,
+        overridden:false, justification:"", hallucination:false
+      }));
+      log("System (AI)", `Analisis selesai: ${a.results.filter(r=>r.result==="FAIL").length} exception dari ${a.results.length} langkah.`);
+      save(); render(); toast("Analisis dokumen pendukung selesai");
+    }, 1500);
+    return;
+  }
+  if(act==="submit"){
+    a.status="UNDER REVIEW"; a.returned=false;
+    log("Preparer Branch","Mengirim hasil assessment ke reviewer (Line 1.5).");
+    save(); go("prep-dash"); toast("Terkirim ke reviewer"); return;
+  }
+
+  /* reviewer */
+  if(act==="saveoverride"){
+    const r=a.results.find(x=>x.step===M.data);
+    const txt=document.getElementById("ovText").value.trim();
+    if(!txt){ toast("Justifikasi wajib diisi"); return; }
+    r.result=document.getElementById("ovVerdict").value;
+    r.justification=txt;
+    r.hallucination=document.getElementById("ovHallu").checked;
+    r.overridden=true;
+    log("Reviewer Branch", `Override step ${r.step}: ${r.aiResult} → ${r.result}${r.hallucination?" (ditandai potensi halusinasi AI)":""}.`);
+    closeModal(); save(); render(); toast("Override tersimpan"); return;
+  }
+  if(act==="reject"){
+    a.status="IN PROGRESS"; a.prepStep=2; a.returned=true;
+    log("Reviewer Branch","Mengembalikan dokumen ke preparer untuk diperbaiki.");
+    save(); go("rev-dash"); toast("Dikembalikan ke preparer"); return;
+  }
+  if(act==="complete"){
+    a.status="COMPLETED";
+    log("Reviewer Branch","Menandai assessment selesai. Report siap dibuat.");
+    save(); go("rev-report"); toast("Assessment ditandai selesai"); return;
+  }
+  if(act==="prev-word"){ openModal("word"); return; }
+  if(act==="prev-excel"){ openModal("excel"); return; }
+});
+
+document.addEventListener("input", e=>{
+  const el=e.target;
+  if(el.dataset.bind){ S.a[el.dataset.bind]=el.value; save(); }
+  if(el.dataset.nd){ S.a.nd[el.dataset.nd]=el.value; save(); }
+  if(el.id==="scopesearch") filterScope(el.value);
+});
+
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"&&M) closeModal(); });
+
+load();
+if(!S.role) S.page="login";
+render();
+</script>
+</body>
+</html>
